@@ -1,33 +1,23 @@
-name: Vulnerability Scan with Trivy
+name: OpenSSH Vulnerability Scan
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch: 
+    branches: [main]
+  workflow_dispatch:
+
 jobs:
-  security-scan:
+  scan:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4  # Автоматически использует ваш форк
+
+      - name: Run Trivy scan
+        uses: aquasecurity/trivy-action@0.9.1
         with:
-          repository: openssh/openssh-portable
-          fetch-depth: 0  
-
-      - name: Install Trivy
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
-          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
-          sudo apt-get update
-          sudo apt-get install -y trivy
-
-      - name: Run Trivy filesystem scan
-        id: trivy-scan
-        run: |
-          trivy fs --security-checks vuln \
-            --severity HIGH,CRITICAL \
-            --exit-code 1 \
-            --no-progress \
-            .
+          scan-type: 'fs'
+          scan-ref: '.'
+          severity: 'HIGH,CRITICAL'
+          exit-code: '1'
+          security-checks: 'vuln'
+          format: 'table'
