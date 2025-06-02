@@ -1,8 +1,8 @@
-name: OpenSSH Trivy Vulnerability Scan
+name: OpenSSH Vulnerability Scan
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -13,36 +13,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: drongrifon/openssh-portable  #karpov
-          fetch-depth: 0  
+          fetch-depth: 0
 
-      - name: Run Trivy scan (FS)
-        id: trivy-fs
+      - name: Run Trivy scan
         uses: aquasecurity/trivy-action@0.9.1
         with:
           scan-type: 'fs'
           scan-ref: '.'
           severity: 'HIGH,CRITICAL'
           exit-code: '1'
-          scanners: 'vuln'  
+          security-checks: 'vuln'
           format: 'table'
-          ignore-unfixed: false  
-          timeout: '10m'  
-
-      - name: Upload Trivy report
-        if: always()  
-        uses: actions/upload-artifact@v3
-        with:
-          name: trivy-fs-report
-          path: trivy-report.txt  
-
-      - name: Check scan results
-        if: steps.trivy-fs.outcome == 'failure'
-        run: |
-          echo "Обнаружены уязвимости HIGH/CRITICAL! Подробности в отчете."
-          exit 1
-
-      - name: Success notification
-        if: steps.trivy-fs.outcome == 'success'
-        run: |
-          echo "Уязвимостей HIGH/CRITICAL не найдено!"
-          echo "Результаты сканирования сохранены как артефакт."
