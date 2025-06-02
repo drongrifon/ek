@@ -1,4 +1,4 @@
-name: OpenSSH Source Vulnerability Scan
+name: Simple OpenSSH Trivy Scan
 
 on:
   push:
@@ -6,47 +6,22 @@ on:
   workflow_dispatch:
 
 jobs:
-  security-scan:
+  scan:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout drongrifon/openssh-portable
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
           repository: drongrifon/openssh-portable
-          token: ${{ secrets.GITHUB_TOKEN }}
-          path: openssh-fork
+          path: openssh
 
-      - name: Scan with Trivy
-        id: trivy-scan
+      - name: Run Trivy scan
         uses: aquasecurity/trivy-action@0.14.0
         with:
           scan-type: 'fs'
-          scan-ref: 'openssh-fork'
+          scan-ref: 'openssh'
           severity: 'HIGH,CRITICAL'
           exit-code: '1'
-          scanners: 'vuln'
-          format: 'sarif'
+          format: 'table'
           ignore-unfixed: true
-          timeout: '10m'
-
-      - name: Upload SARIF report
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: trivy-results.sarif
-        if: always()
-
-      - name: Show scan summary
-        run: |
-          echo "=== Trivy Scan Results ==="
-          echo "Repository: drongrifon/openssh-portable"
-          echo "Scan type: Filesystem (source code)"
-          echo "Severity filter: HIGH,CRITICAL"
-          echo "Scan completed at: $(date)"
-          echo "=========================="
-          if [ "${{ steps.trivy-scan.outcome }}" == "failure" ]; then
-            echo "::error::Found critical vulnerabilities!"
-            echo "See full report in Artifacts"
-          else
-            echo "::notice::No high/critical vulnerabilities found"
-          fi
