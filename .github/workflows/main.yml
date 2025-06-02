@@ -3,8 +3,7 @@ name: Vulnerability Scan with Trivy
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:  # Разрешает ручной запуск
-
+  workflow_dispatch: 
 jobs:
   security-scan:
     runs-on: ubuntu-latest
@@ -13,7 +12,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: openssh/openssh-portable
-          fetch-depth: 0  # Полная история коммитов для анализа
+          fetch-depth: 0  
 
       - name: Install Trivy
         run: |
